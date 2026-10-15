@@ -28,7 +28,8 @@ import {
   LogOut,
   HelpCircle,
   FolderPlus,
-  Eye
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { quizService } from "../services/quizService";
 import { sounds } from "../utils/soundEffects";
@@ -94,6 +95,11 @@ export default function AdminDashboard({ quizState, teams, questions, onLockHost
   const [editingTeam, setEditingTeam] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", pin: "", player1: "", player2: "" });
   const [editError, setEditError] = useState("");
+  const [revealedPins, setRevealedPins] = useState({});
+
+  const toggleRevealPin = (teamId) => {
+    setRevealedPins(prev => ({ ...prev, [teamId]: !prev[teamId] }));
+  };
 
   const teamsList = useMemo(() => Object.values(teams || {}), [teams]);
   const totalTeams = teamsList.length;
@@ -1323,17 +1329,36 @@ export default function AdminDashboard({ quizState, teams, questions, onLockHost
                         <div style={{ fontSize: "0.72rem", color: "#64748b", fontFamily: "monospace" }}>{t.id}</div>
                       </td>
                       <td style={{ padding: "10px 12px" }}>
-                        <span style={{
-                          fontFamily: "monospace",
-                          color: "#00f2fe",
-                          fontWeight: 800,
-                          background: "rgba(0, 242, 254, 0.1)",
-                          padding: "3px 8px",
-                          borderRadius: 6,
-                          letterSpacing: "0.05em"
-                        }}>
-                          {t.pin}
-                        </span>
+                        <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                          <span style={{
+                            fontFamily: "monospace",
+                            color: revealedPins[t.id] ? "#00f2fe" : "#94a3b8",
+                            fontWeight: 800,
+                            background: "rgba(0, 242, 254, 0.08)",
+                            padding: "3px 8px",
+                            borderRadius: 6,
+                            letterSpacing: revealedPins[t.id] ? "0.06em" : "0.2em",
+                            fontSize: "0.85rem"
+                          }}>
+                            {revealedPins[t.id] ? t.pin : "••••••"}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => toggleRevealPin(t.id)}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              color: revealedPins[t.id] ? "#00f2fe" : "#64748b",
+                              cursor: "pointer",
+                              padding: 3,
+                              display: "inline-flex",
+                              alignItems: "center"
+                            }}
+                            title={revealedPins[t.id] ? "Hide PIN" : "Reveal PIN (Host only)"}
+                          >
+                            {revealedPins[t.id] ? <EyeOff size={14} /> : <Eye size={14} />}
+                          </button>
+                        </div>
                       </td>
                       <td style={{ padding: "10px 12px", color: "#cbd5e1", fontSize: "0.85rem" }}>
                         {t.player1} {t.player2 && <span style={{ color: "#94a3b8" }}>&amp; {t.player2}</span>}
@@ -1778,7 +1803,7 @@ export default function AdminDashboard({ quizState, teams, questions, onLockHost
           style={{ width: "100%", justifyContent: "center", padding: "14px", fontSize: "0.95rem" }}
         >
           {showAdvanced ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-          <span>{showAdvanced ? "Hide Advanced Tools & Roster" : "Show Advanced Tools (Anti-Cheat, Sheets Sync, Reset)"}</span>
+          <span>{showAdvanced ? "Hide Anti-Cheat Sentinel & Advanced Tools" : "Show Advanced Tools (Anti-Cheat Sentinel & Reset)"}</span>
           {disqualifiedTeams.length > 0 && (
             <span style={{ background: "#ef476f", color: "#fff", padding: "2px 8px", borderRadius: 10, fontSize: "0.75rem", fontWeight: 800 }}>
               {disqualifiedTeams.length} Violations
@@ -1817,7 +1842,16 @@ export default function AdminDashboard({ quizState, teams, questions, onLockHost
                     {teamsList.map((t) => (
                       <tr key={t.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         <td style={{ padding: "10px 12px", fontWeight: 700, color: "#fff" }}>{t.name}</td>
-                        <td style={{ padding: "10px 12px", fontFamily: "monospace", color: "#00f2fe" }}>{t.pin}</td>
+                        <td style={{ padding: "10px 12px" }}>
+                          <span style={{
+                            fontFamily: "monospace",
+                            color: revealedPins[t.id] ? "#00f2fe" : "#64748b",
+                            letterSpacing: revealedPins[t.id] ? "0.05em" : "0.2em",
+                            fontSize: "0.85rem"
+                          }}>
+                            {revealedPins[t.id] ? t.pin : "••••••"}
+                          </span>
+                        </td>
                         <td style={{ padding: "10px 12px", color: "#94a3b8", fontSize: "0.85rem" }}>{t.player1} &amp; {t.player2}</td>
                         <td style={{ padding: "10px 12px", fontWeight: 800, color: "#eab308" }}>{t.score || 0}</td>
                         <td style={{ padding: "10px 12px" }}>
@@ -1847,27 +1881,7 @@ export default function AdminDashboard({ quizState, teams, questions, onLockHost
               </div>
             </div>
 
-            {/* Google Sheets Sync Box */}
-            <div className="glass-panel" style={{ padding: "24px" }}>
-              <h3 style={{ fontSize: "1.2rem", color: "#fff", marginBottom: 8 }}>
-                Import Teams / Questions from Google Sheet JSON
-              </h3>
-              <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginBottom: 14 }}>
-                Paste the JSON from Google Sheets &gt; ⚡ FunQuiz Controls &gt; Export All as JSON:
-              </p>
-              <textarea
-                rows={4}
-                className="neon-input"
-                placeholder='Paste JSON here...'
-                value={jsonInput}
-                onChange={(e) => setJsonInput(e.target.value)}
-                style={{ fontFamily: "monospace", fontSize: "0.8rem", marginBottom: 12 }}
-              />
-              <button onClick={handleImportJson} className="btn-primary" style={{ padding: "10px 18px" }}>
-                <UploadCloud size={16} /> Apply Imported Data
-              </button>
-              {importStatus && <span style={{ marginLeft: 14, fontSize: "0.85rem", fontWeight: 600 }}>{importStatus}</span>}
-            </div>
+
 
             {/* Reset Entire Quiz */}
             <div style={{

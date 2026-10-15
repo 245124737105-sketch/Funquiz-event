@@ -203,37 +203,26 @@ export default function TeamLogin({ teams, quizState = {}, onLoginSuccess }) {
                 }}
               />
             </div>
-            {selectedTeam && (
-              <p style={{ fontSize: "0.75rem", color: "#64748b", marginTop: 6 }}>
-                Demo Hint: PIN for {selectedTeam.name} is <code style={{ color: "#00f2fe" }}>{selectedTeam.pin}</code>
-              </p>
-            )}
           </div>
 
-          {/* Anti-Cheat Notice */}
-          <div style={{
-            background: quizState.antiCheatEnabled ? "rgba(239, 71, 111, 0.1)" : "rgba(234, 179, 8, 0.1)",
-            border: `1px solid ${quizState.antiCheatEnabled ? "rgba(239, 71, 111, 0.3)" : "rgba(234, 179, 8, 0.3)"}`,
-            borderRadius: 12,
-            padding: "14px 18px",
-            marginBottom: 28,
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 12
-          }}>
-            <ShieldAlert size={22} color={quizState.antiCheatEnabled ? "#ef476f" : "#eab308"} style={{ flexShrink: 0, marginTop: 2 }} />
-            <div style={{ fontSize: "0.85rem", color: quizState.antiCheatEnabled ? "#fca5a5" : "#fef08a", lineHeight: 1.45 }}>
-              {quizState.antiCheatEnabled ? (
-                <>
-                  <strong>Full Screen Anti-Cheat Protocol:</strong> Starting the quiz locks the screen into Fullscreen. Exiting fullscreen or shifting window focus will <strong>immediately terminate your game</strong>!
-                </>
-              ) : (
-                <>
-                  <strong>🛠️ Single-Laptop Testing Mode:</strong> Anti-Cheat is currently <strong>DISABLED</strong> by the Host. You can freely switch windows and test both sides without any beeps or disqualifications!
-                </>
-              )}
+          {/* Anti-Cheat Notice (Shown only when Anti-Cheat is activated by Host) */}
+          {quizState.antiCheatEnabled && (
+            <div style={{
+              background: "rgba(239, 71, 111, 0.1)",
+              border: "1px solid rgba(239, 71, 111, 0.3)",
+              borderRadius: 12,
+              padding: "14px 18px",
+              marginBottom: 28,
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 12
+            }}>
+              <ShieldAlert size={22} color="#ef476f" style={{ flexShrink: 0, marginTop: 2 }} />
+              <div style={{ fontSize: "0.85rem", color: "#fca5a5", lineHeight: 1.45 }}>
+                <strong>Full Screen Anti-Cheat Protocol:</strong> Starting the quiz locks the screen into Fullscreen. Exiting fullscreen or shifting window focus will <strong>immediately terminate your game</strong>!
+              </div>
             </div>
-          </div>
+          )}
 
           {errorMsg && (
             <div style={{
@@ -255,7 +244,7 @@ export default function TeamLogin({ teams, quizState = {}, onLoginSuccess }) {
             className="btn-primary"
             style={{ width: "100%", padding: "16px", fontSize: "1.1rem" }}
           >
-            <Play size={20} fill="#fff" /> {quizState.antiCheatEnabled ? "START TEST & ENTER FULLSCREEN" : "ENTER ARENA (TEST MODE)"}
+            <Play size={20} fill="#fff" /> {quizState.antiCheatEnabled ? "ENTER ARENA (FULLSCREEN)" : "ENTER ARENA"}
           </button>
         </form>
       </div>

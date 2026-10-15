@@ -93,9 +93,6 @@ export default function HostAuthModal({ isOpen, onClose, onAuthSuccess }) {
                 autoFocus
               />
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: "0.75rem", color: "#64748b" }}>
-              <span>Default Host Passcode: <code style={{ color: "#00f2fe" }}>admin2026</code></span>
-            </div>
           </div>
 
           {errorMsg && (
